@@ -191,8 +191,10 @@ int evenBits(void) {
  *   Rating: 3 
  */
 int logicalShift(int x, int n) {
-  
-  return 2;
+  int mask;
+  x = x >> n; 
+  mask = ~(1 << 31 >> n << 1); 
+  return x & mask;
 }
 /* 
  * bang - Compute !x without using !
@@ -202,7 +204,11 @@ int logicalShift(int x, int n) {
  *   Rating: 4 
  */
 int bang(int x) {
-  return 2;
+  //x = 0001, ~x 1110
+  // ~x + 1
+  //(~x + 1 | x) >> 31 + 1
+  //The not of x, and then add one. Shift all of that back 31 places, and then add 1. If it is a zero then it will come back as 1, which is what we want from bang. 
+  return (((~x + 1) | x) >> 31) + 1;
 }
 /* 
  * leastBitPos - return a mask that marks the position of the
@@ -213,7 +219,7 @@ int bang(int x) {
  *   Rating: 2 
  */
 int leastBitPos(int x) {
-  return 2;
+  return ((~x + 1) & x);
 }
 /* 
  * isNotEqual - return 0 if x == y, and 1 otherwise 
@@ -223,7 +229,7 @@ int leastBitPos(int x) {
  *   Rating: 2
  */
 int isNotEqual(int x, int y) {
-  return 2;
+  return !!(x ^ y);
 }
 /* 
  * negate - return -x 
@@ -232,8 +238,9 @@ int isNotEqual(int x, int y) {
  *   Max ops: 5
  *   Rating: 2
  */
-int negate(int x) {
-  return 2;
+int negate(int x) { //Basically 2's complement?
+
+  return ~x + 1;
 }
 /* 
  * isPositive - return 1 if x > 0, return 0 otherwise 
@@ -243,7 +250,10 @@ int negate(int x) {
  *   Rating: 3
  */
 int isPositive(int x) {
-  return 2;
+  //int mask;
+  //!x checks for non-zero
+  //1 << 31 will move to MSB, and then AND with x will check for negativity 
+  return !((x >> 31) | !x);
 }
 /* 
  * isNonNegative - return 1 if x >= 0, return 0 otherwise 
@@ -253,7 +263,7 @@ int isPositive(int x) {
  *   Rating: 3
  */
 int isNonNegative(int x) {
-  return 2;
+  return !(x >> 31);
 }
 /* 
  * rotateLeft - Rotate x to the left by n
@@ -299,7 +309,9 @@ int addOK(int x, int y) {
  *   Rating: 4
  */
 int absVal(int x) {
-  return 2;
+  int mask;
+  mask = x >> 31;
+  return ((x + mask) ^ mask);
 }
 /* 
  * isNonZero - Check whether x is nonzero using
@@ -310,5 +322,8 @@ int absVal(int x) {
  *   Rating: 4 
  */
 int isNonZero(int x) {
-  return 2;
+  int notx, notIcrementNotx;
+  notx = ~x;
+  notIcrementNotx = ~(notx + 1);
+  return ~((notx & notIcrementNotx) >> 31)&1;
 }
